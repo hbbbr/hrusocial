@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>hrusocial</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    #appFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    /* Плавающая кнопка установки PWA, появляющаяся когда Chrome разрешает установку */
+    #installBanner {
+      display: none;
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111827;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 9999px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    #installBtn {
+      background: #4f46e5;
+      color: #ffffff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    #closeBannerBtn {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <iframe id="appFrame" allow="clipboard-read; clipboard-write; web-share"></iframe>
+
+  <div id="installBanner">
+    <span>⚡ Установить <b>hrusocial</b></span>
+    <button id="installBtn">Установить</button>
+    <button id="closeBannerBtn" title="Закрыть">&times;</button>
+  </div>
+
+  <script>
+    // ВСТАВЬТЕ СЮДА ПРЯМУЮ ССЫЛКУ НА ВАШ СКРИПТ GOOGLE APPS SCRIPT (оканчивается на /exec):
+    const GAS_APP_URL = "https://google.com";
+
+    // Пробрасываем ?user=... или #... из адресной строки GitHub Pages внутрь приложения
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUser = urlParams.get('user');
+    const hash = window.location.hash;
+
+    let finalSrc = GAS_APP_URL;
+    if (targetUser) {
+      finalSrc += "?user=" + encodeURIComponent(targetUser);
+    }
+    if (hash) {
+      finalSrc += hash;
+    }
+
+    document.getElementById('appFrame').src = finalSrc;
+
+    // Регистрация Service Worker для работы PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn('Ошибка регистрации SW:', err);
+        });
+      });
+    }
+
+    // Обработка кнопки установки PWA в Chrome / Android
+    let deferredPrompt = null;
+    const banner = document.getElementById('installBanner');
+    const installBtn = document.getElementById('installBtn');
+    const closeBtn = document.getElementById('closeBannerBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      banner.style.display = 'flex';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        banner.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+
+    closeBtn.addEventListener('click', () => {
+      banner.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
