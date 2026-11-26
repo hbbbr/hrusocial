@@ -1,0 +1,19 @@
+{
+  "short_name": "hrusocial",
+  "name": "hrusocial — Быстрая микро-соцсеть",
+  "description": "Микро-соцсеть от ХБББР",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "scope": "./",
+  "background_color": "#f3f4f6",
+  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "orientation": "portrait"
+}
